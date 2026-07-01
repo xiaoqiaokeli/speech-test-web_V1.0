@@ -483,3 +483,21 @@ h1 {
     font-size: 14px;
   }
 }
+
+.record-button {
+  width: min(100%, 300px);
+  min-height: 62px;
+  margin-top: 22px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 23px;
+  font-weight: 900;
+  box-shadow: 0 10px 22px rgba(11, 118, 109, 0.22);
+}
+
+.record-button:active {
+  background: var(--primary-dark);
+  transform: translateY(1px);
+}

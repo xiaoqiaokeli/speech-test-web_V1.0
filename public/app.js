@@ -148,6 +148,7 @@
     answerText: document.getElementById("answerText"),
     resultFlash: document.getElementById("resultFlash"),
     resumeAudioButton: document.getElementById("resumeAudioButton"),
+    recordButton: document.getElementById("recordButton"),
     noticeModal: document.getElementById("noticeModal"),
     startButton: document.getElementById("startButton"),
     restartButton: document.getElementById("restartButton"),
@@ -175,6 +176,11 @@
   elements.startButton.addEventListener("click", () => {
     elements.noticeModal.classList.add("is-hidden");
     startTest();
+  });
+
+  elements.recordButton.addEventListener("click", () => {
+    elements.recordButton.classList.add("is-hidden");
+    beginRecognition();
   });
 
   elements.resumeAudioButton.addEventListener("click", () => {
@@ -262,6 +268,26 @@
     elements.resumeAudioButton.classList.remove("is-hidden");
   }
 
+  function needsManualRecordStart() {
+    return /MicroMessenger|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  }
+
+  function handleAudioEnded() {
+    if (needsManualRecordStart()) {
+      showManualRecordStart();
+      return;
+    }
+    beginRecognition();
+  }
+
+  function showManualRecordStart() {
+    setPhase("recording");
+    elements.screenTitle.textContent = "准备录音";
+    elements.phaseText.textContent = "请点击开始录音";
+    elements.hintText.textContent = "苹果设备和微信需要点一下，才可以稳定开始识别。";
+    elements.recordButton.classList.remove("is-hidden");
+  }
+
   function playCurrentWord() {
     const item = testItems[currentIndex];
     finalized = false;
@@ -270,10 +296,11 @@
     hideFlash();
     hideAnswer();
     elements.resumeAudioButton.classList.add("is-hidden");
+    elements.recordButton.classList.add("is-hidden");
     stopAudio();
 
     currentAudio = getAudioElement();
-    currentAudio.onended = beginRecognition;
+    currentAudio.onended = handleAudioEnded;
     currentAudio.onerror = () => finalizeCurrent([""], "音频播放失败");
     currentAudio.src = item.audio;
     currentAudio.load();
@@ -485,6 +512,8 @@
     elements.correctCount.textContent = String(correct);
     elements.wrongCount.textContent = String(wrong);
     elements.accuracyText.textContent = `${accuracy}%`;
+    elements.resumeAudioButton.classList.add("is-hidden");
+    elements.recordButton.classList.add("is-hidden");
     elements.resultList.innerHTML = "";
 
     const sortedAnswers = answers.slice().sort((a, b) => {
@@ -509,6 +538,8 @@
     clearTimeout(countdownTimer);
     hideFlash();
     hideAnswer();
+    elements.resumeAudioButton.classList.add("is-hidden");
+    elements.recordButton.classList.add("is-hidden");
     elements.screenTitle.textContent = title;
     elements.phaseText.textContent = title;
     elements.hintText.textContent = message;
